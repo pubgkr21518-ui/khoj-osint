@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KHOJ — OSINT Recon Toolkit</title>
+<meta name="description" content="Client-side OSINT: phone, email, username deep recon. Runs in your browser.">
+<style>
+:root{--bg:#070a09;--card:#101716;--card2:#0c1312;--line:#1d2a27;--fg:#dbe9e5;--dim:#7b918c;
+--acc:#00e6a0;--acc2:#22d3ee;--warn:#f5b642;--bad:#ff5f6d;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1100px 520px at 50% -12%,#0c2b22 0%,transparent 65%),var(--bg);
+background-attachment:fixed;color:var(--fg);font-family:var(--mono);font-size:14px;line-height:1.55}
+a{color:var(--acc2);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:1060px;margin:0 auto;padding:0 16px 80px}
+header{padding:26px 0 14px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-size:26px;font-weight:800;letter-spacing:6px;color:var(--acc);text-shadow:0 0 18px rgba(0,230,160,.45)}
+.logo span{color:var(--acc2)}
+.tag{color:var(--dim);font-size:11.5px;letter-spacing:1.6px;text-transform:uppercase}
+.hdr-actions{margin-left:auto;display:flex;gap:8px}
+.tabs{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+.tab{background:var(--card);border:1px solid var(--line);color:var(--dim);padding:10px 16px;border-radius:9px;
+cursor:pointer;font-family:var(--mono);font-size:13px;letter-spacing:.5px;transition:.15s}
+.tab:hover{border-color:var(--acc);color:var(--fg)}
+.tab.on{background:rgba(0,230,160,.11);border-color:var(--acc);color:var(--acc)}
+.panel{display:none}.panel.on{display:block}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+input,select,button{font-family:var(--mono);font-size:14px}
+input[type=text],select{flex:1 1 220px;min-width:0;background:var(--card2);color:var(--fg);
+border:1px solid var(--line);border-radius:9px;padding:12px 13px;outline:none}
+input[type=text]:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(0,230,160,.12)}
+select{flex:0 1 130px}
+button.go{background:linear-gradient(180deg,#00e6a0,#00b47e);color:#04120d;border:0;border-radius:9px;
+padding:12px 22px;font-weight:800;letter-spacing:.8px;cursor:pointer}
+button.go:hover{filter:brightness(1.08)}
+button.ghost{background:var(--card);border:1px solid var(--line);color:var(--dim);border-radius:8px;
+padding:8px 12px;cursor:pointer;font-size:12px}
+button.ghost:hover{border-color:var(--acc);color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}
+.card h3{margin:0 0 10px;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--acc);
+display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card h3 .sp{margin-left:auto}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:6px 12px;font-size:13px}
+.kv b{color:var(--dim);font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:7px}
+.item{display:flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);
+border-radius:8px;padding:8px 10px;font-size:12.5px}
+.item .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item a{font-size:11px;padding:3px 7px;border:1px solid var(--line);border-radius:6px;color:var(--dim)}
+.item a:hover{border-color:var(--acc);color:var(--acc);text-decoration:none}
+.dot{width:7px;height:7px;border-radius:50%;background:#3a4a47;flex:0 0 auto}
+.dot.f{background:var(--acc);box-shadow:0 0 7px var(--acc)}.dot.x{background:var(--bad)}.dot.e{background:var(--warn)}
+.pill{font-size:10px;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--dim);white-space:nowrap}
+.pill.ok{color:var(--acc);border-color:rgba(0,230,160,.5);background:rgba(0,230,160,.1)}
+.pill.no{color:var(--bad);border-color:rgba(255,95,109,.45);background:rgba(255,95,109,.1)}
+.pill.un{color:var(--warn);border-color:rgba(245,182,66,.4);background:rgba(245,182,66,.1)}
+.hint{color:var(--dim);font-size:12px;margin:10px 0 0}
+.warnbox{border-left:2px solid var(--warn);background:rgba(245,182,66,.07);padding:10px 12px;
+border-radius:0 8px 8px 0;font-size:12.5px;color:#e3d3ad;margin-top:12px}
+.errbox{border-left:2px solid var(--bad);background:rgba(255,95,109,.07);padding:10px 12px;
+border-radius:0 8px 8px 0;font-size:12.5px;color:#f2c3c7;margin-top:12px}
+.cat{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--dim);margin:18px 0 8px;
+border-bottom:1px dashed var(--line);padding-bottom:5px}
+.avatar{width:64px;height:64px;border-radius:50%;border:1px solid var(--acc);object-fit:cover;background:#000}
+.prof{display:flex;gap:14px;align-items:flex-start}
+.mono-out{background:#050908;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:12px;
+white-space:pre-wrap;word-break:break-all;max-height:260px;overflow:auto}
+.res{border-left:2px solid var(--line);padding:6px 0 6px 10px;margin:8px 0;font-size:12.5px}
+.res b{display:block;color:var(--acc2);font-weight:500}
+.res span{color:var(--dim);font-size:11.5px}
+footer{margin-top:44px;border-top:1px solid var(--line);padding-top:16px;color:var(--dim);font-size:11.5px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--acc);
+color:#04120d;padding:10px 18px;border-radius:8px;font-weight:700;font-size:12.5px;opacity:0;transition:.25s;z-index:99}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;place-items:center;padding:16px;z-index:100}
+#modal.on{display:grid}
+#modal .box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;
+max-width:520px;width:100%;max-height:88vh;overflow:auto}
+#modal label{display:block;font-size:11.5px;color:var(--dim);margin:12px 0 5px}
+#modal input{width:100%}
+.spin{display:inline-block;width:11px;height:11px;border:2px solid var(--line);border-top-color:var(--acc);
+border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(max-width:560px){.kv{grid-template-columns:1fr}.logo{font-size:21px;letter-spacing:4px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div class="brand">
+<div class="logo">KH<span>O</span>J</div><div class="tag">deep osint recon</div>
+<div class="hdr-actions">
+<button class="ghost" onclick="openKeys()">API KEYS</button>
+<button class="ghost" onclick="dlReport()">SAVE REPORT</button>
+</div></div></header>
+
+<div class="tabs">
+<button class="tab on" data-tab="phone">📞 PHONE</button>
+<button class="tab" data-tab="email">✉️ EMAIL</button>
+<button class="tab" data-tab="user">👤 USERNAME</button>
+</div>
+
+<section class="panel on" id="p-phone">
+<div class="row">
+<select id="cc"><option value="IN" selected>🇮🇳 +91</option><option value="US">🇺🇸 +1</option>
+<option value="GB">🇬🇧 +44</option><option value="AE">🇦🇪 +971</option><option value="PK">🇵🇰 +92</option>
+<option value="NP">🇳🇵 +977</option><option value="BD">🇧🇩 +880</option><option value="SA">🇸🇦 +966</option>
+<option value="AU">🇦🇺 +61</option><option value="CA">🇨🇦 +1</option><option value="SG">🇸🇬 +65</option>
+<option value="DE">🇩🇪 +49</option></select>
+<input type="text" id="ph" placeholder="9876543210 ya +91 98765 43210" autocomplete="off">
+<button class="go" onclick="runPhone()">DEEP SCAN</button>
+</div>
+<p class="hint">Naam, city, photo, Telegram, web mentions — sab khud fetch hoga. Block hone pe manual link milega.</p>
+<div id="ph-out"></div>
+</section>
+
+<section class="panel" id="p-email">
+<div class="row">
+<input type="text" id="em" placeholder="someone@example.com" autocomplete="off">
+<button class="go" onclick="runEmail()">DEEP SCAN</button>
+</div>
+<p class="hint">Gravatar, leaks, GitHub commits, domain records, service accounts, web mentions.</p>
+<div id="em-out"></div>
+</section>
+
+<section class="panel" id="p-user">
+<div class="row">
+<input type="text" id="un" placeholder="username bina @ ke" autocomplete="off">
+<button class="go" onclick="runUser()">DEEP SCAN</button>
+<button class="ghost" onclick="openAllLinks()">OPEN ALL</button>
+</div>
+<p class="hint">75+ platforms, auto-verify + web mentions.</p>
+<div id="un-out"></div>
+</section>
+
+<footer><b>KHOJ</b> — sab kuch browser me. Koi server nahi. Free proxies + public APIs.<br>
+Aadhaar number free API se nahi milta — naam/address ke liye Truecaller + Justdial deep links.</footer>
+</div>
+
+<div id="modal"><div class="box">
+<h3 style="margin:0;color:var(--acc);letter-spacing:1.5px">OPTIONAL API KEYS</h3>
+<p class="hint">Bina inke bhi sab chalta hai. Free tier ke liye signup karke paste kar.</p>
+<label>ABSTRACTAPI — PHONE</label><input type="text" id="k-phone">
+<label>ABSTRACTAPI — EMAIL</label><input type="text" id="k-email">
+<label>VERIPHONE</label><input type="text" id="k-veriphone">
+<label>HIBP (paid, optional)</label><input type="text" id="k-hibp">
+<div style="display:flex;gap:8px;margin-top:16px">
+<button class="go" onclick="saveKeys()">SAVE</button>
+<button class="ghost" onclick="document.getElementById('modal').classList.remove('on')">CLOSE</button>
+</div></div></div>
+<div id="toast"></div>
+
+<script type="module">
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1500)};
+const copy=t=>navigator.clipboard.writeText(t).then(()=>toast('Copied'));
+window.copy=copy;
+const K=()=>JSON.parse(localStorage.getItem('khoj_keys')||'{}');
+window.openKeys=()=>{const k=K();['phone','email','veriphone','hibp'].forEach(n=>$('#k-'+n).value=k[n]||'');$('#modal').classList.add('on')};
+window.saveKeys=()=>{const o={};['phone','email','veriphone','hibp'].forEach(n=>o[n]=$('#k-'+n).value.trim());
+localStorage.setItem('khoj_keys',JSON.stringify(o));$('#modal').classList.remove('on');toast('saved')};
+$$('.tab').forEach(b=>b.onclick=()=>{$$('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+$$('.panel').forEach(p=>p.classList.remove('on'));$('#p-'+b.dataset.tab).classList.add('on')});
+
+/* ---- proxy fetch ---- */
+const PROXIES=[
+ u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u),
+ u=>'https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(u),
+ u=>'https://corsproxy.io/?url='+encodeURIComponent(u),
+ u=>'https://api.allorigins.win/get?url='+encodeURIComponent(u)
+];
+async function fetchAny(url,t=10000){
+ const tries=[url,...PROXIES.map(f=>f(url))];
+ for(const u of tries){
+  try{
+   const c=new AbortController(),id=setTimeout(()=>c.abort(),t);
+   const r=await fetch(u,{signal:c.signal,credentials:'omit'});
+   clearTimeout(id);
+   let x=await r.text();
+   if(x.trimStart().startsWith('{"contents"')){try{x=JSON.parse(x).contents||''}catch(e){}}
+   if(r.ok&&x&&x.length>40)return{ok:1,txt:x};
+  }catch(e){}
+ }
+ return{ok:0,txt:''};
+}
+async function jget(url){
+ const r=await fetch(url,{credentials:'omit'});
+ if(!r.ok)throw 0;return r.json();
+}
+
+/* ---- source card ---- */
+function card(id,title,link){
+ return `<div class="card" id="${id}"><h3>${esc(title)}<span class="sp spin"></span>
+ ${link?`<a href="${esc(link)}" target="_blank" rel="noopener" style="font-size:10px">open ↗</a>`:''}</h3>
+ <div class="body"></div></div>`;
+}
+function done(id,status,html){
+ const c=document.getElementById(id);if(!c)return;
+ c.querySelector('.spin')?.remove();
+ const h=c.querySelector('h3');
+ const p=document.createElement('span');p.className='pill '+(status==='f'?'ok':status==='x'?'no':'un');
+ p.textContent=status==='f'?'FOUND':status==='x'?'NONE':'BLOCKED';h.appendChild(p);
+ c.querySelector('.body').innerHTML=html||'';
+}
+
+/* ---- md5 ---- */
+const md5=str=>{const b=new TextEncoder().encode(str),bl=b.length*8;
+const bf=new Uint8Array(Math.ceil((b.length+9)/64)*64);bf.set(b);bf[b.length]=0x80;
+const dv=new DataView(bf.buffer);dv.setUint32(bf.length-8,bl>>>0,1);dv.setUint32(bf.length-4,Math.floor(bl/4294967296),1);
+const Kc=[];for(let i=0;i<64;i++)Kc.push(Math.floor(Math.abs(Math.sin(i+1))*4294967296)>>>0);
+const S=[7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,
+4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+let a=0x67452301,c2=0xefcdab89,c3=0x98badcfe,c4=0x10325476;const M=new Uint32Array(16);
+for(let o=0;o<bf.length;o+=64){for(let i=0;i<16;i++)M[i]=dv.getUint32(o+i*4,1);
+let A=a,B=c2,C=c3,D=c4;
+for(let i=0;i<64;i++){let F,g;
+if(i<16){F=(B&C)|(~B&D);g=i}else if(i<32){F=(D&B)|(~D&C);g=(5*i+1)%16}
+else if(i<48){F=B^C^D;g=(3*i+5)%16}else{F=C^(B|~D);g=(7*i)%16}
+const t=D;D=C;C=B;const s=(A+F+Kc[i]+M[g])>>>0;B=(B+((s<<S[i])|(s>>>(32-S[i]))))>>>0;A=t}
+a=(a+A)>>>0;c2=(c2+B)>>>0;c3=(c3+C)>>>0;c4=(c4+D)>>>0}
+const o2=new Uint8Array(16),ov=new DataView(o2.buffer);
+ov.setUint32(0,a,1);ov.setUint32(4,c2,1);ov.setUint32(8,c3,1);ov.setUint32(12,c4,1);
+return[...o2].map(x=>x.toString(16).padStart(2,'0')).join('')};
+
+const STATE={};
+const e164d=s=>s.replace(/[^\d]/g,'');
+const flag=c=>c.replace(/./g,x=>String.fromCodePoint(127397+x.charCodeAt(0)));
+const cname=c=>{try{return new Intl.DisplayNames(['en'],{type:'region'}).of(c)||c}catch(e){return c}};
+function links(t,arr){return arr.length?`<div class="cat">${esc(t)}</div><div class="grid">${arr.map(i=>
+`<div class="item"><span class="nm">${esc(i.n)}</span><a href="${esc(i.h)}" target="_blank" rel="noopener">OPEN</a></div>`).join('')}</div>`:''}
+
+/* ---- web mentions (DDG + Bing) ---- */
+async function webMentions(query,host){
+ host.innerHTML=card('wm','web mentions',`https://duckduckgo.com/?q=${encodeURIComponent(query)}`);
+ const ddg='https://html.duckduckgo.com/html/?q='+encodeURIComponent(query);
+ const r=await fetchAny(ddg);
+ if(!r.ok){done('wm','e','<p class="hint">Proxy block. Manual link khol.</p>');return}
+ const doc=new DOMParser().parseFromString(r.txt,'text/html');
+ let out='',n=0;
+ for(const a of doc.querySelectorAll('.result__a')){
+  if(n>=8)break;
+  let h=a.getAttribute('href')||'';
+  const m=h.match(/uddg=([^&]+)/);if(m)h=decodeURIComponent(m[1]);
+  if(!h.startsWith('http'))continue;
+  const sn=a.closest('.result')?.querySelector('.result__snippet')?.textContent||'';
+  out+=`<div class="res"><b><a href="${esc(h)}" target="_blank" rel="noopener">${esc(a.textContent.trim().slice(0,90))}</a></b><span>${esc(sn.trim().slice(0,150))}</span></div>`;
+  n++;
+ }
+ done('wm',n?'f':'x',n?out:'<p class="hint">Koi public mention nahi mila.</p>');
+ if(n)STATE.mentions=(STATE.mentions||[]).concat([...doc.querySelectorAll('.result__a')].slice(0,8).map(a=>a.textContent.trim()));
+}
+
+/* ---- PHONE ---- */
+let LPN=null;
+try{LPN=await import('https://esm.sh/libphonenumber-js@1.11.9/max')}catch(e){try{LPN=await import('https://esm.sh/libphonenumber-js@1.11.9')}catch(e2){}}
+const TY={MOBILE:'Mobile',FIXED_LINE:'Landline',FIXED_LINE_OR_MOBILE:'Mobile/Landline',TOLL_FREE:'Toll free',
+PREMIUM_RATE:'Premium rate',VOIP:'VoIP',SHARED_COST:'Shared cost',PERSONAL_NUMBER:'Personal',PAGER:'Pager',UAN:'UAN',VOICEMAIL:'Voicemail'};
+
+window.runPhone=async()=>{
+ const raw=$('#ph').value.trim(),cc=$('#cc').value,out=$('#ph-out');
+ if(!raw){out.innerHTML='<div class="errbox">Number daalo.</div>';return}
+ out.innerHTML='<div class="card"><span class="spin"></span> scanning…</div>';
+ let p=null;
+ if(LPN){try{p=LPN.parsePhoneNumberFromString(raw.startsWith('+')?raw:raw.replace(/^0+/,''),cc)}catch(e){}}
+ const dg=raw.replace(/[^\d]/g,'');
+ if(!p&&dg.length<6){out.innerHTML='<div class="errbox">Parse fail. Country select kar ya + ke saath pura number de.</div>';return}
+ const e164=p?p.number:'+'+dg,nat=p?p.nationalNumber:dg,iso=p?p.country:cc;
+ STATE.phone={input:raw,e164,national:nat,iso};
+
+ let html=`<div class="card"><h3>number intel</h3><div class="kv">
+ <b>E.164</b><span>${esc(e164)} <a href="#" onclick="copy('${esc(e164)}');return false" style="font-size:11px">copy</a></span>
+ <b>National</b><span>${esc(nat)}</span>
+ <b>Country</b><span>${iso?flag(iso)+' '+esc(cname(iso)):'?'}</span>
+ <b>Line type</b><span>${p&&p.getType()?(TY[p.getType()]||p.getType()):'unknown'}</span>
+ <b>Valid</b><span>${p&&p.isValid()?'<span class="pill ok">YES</span>':'<span class="pill no">NO</span>'}</span>
+ </div></div>`;
+
+ html+=card('tc','truecaller','https://www.truecaller.com/search/'+(iso||'in').toLowerCase()+'/'+nat);
+ html+=card('sm','sync.me','https://sync.me/search/?number='+e164d(e164));
+ html+=card('tg','telegram','https://t.me/+'+e164d(e164));
+ html+=`<div class="card" id="wm-slot"></div>`;
+ if(K().veriphone)html+=card('vp','veriphone');
+ else if(K().phone)html+=card('ap','abstractapi');
+
+ html+=links('identity',[
+  {n:'WhatsApp',h:'https://wa.me/'+e164d(e164)},
+  {n:'Signal',h:'https://signal.me/#p/'+e164},
+  {n:'Epieos',h:'https://epieos.com/?q='+encodeURIComponent(e164)+'&t=phone'},
+  {n:'Numlookup',h:'https://www.numlookup.com/'},
+  {n:'Free Carrier Lookup',h:'https://freecarrierlookup.com/'}]);
+ html+=links('web dorks',[
+  {n:'Google exact',h:'https://www.google.com/search?q=%22'+nat+'%22'},
+  {n:'Google + name/address',h:'https://www.google.com/search?q=%22'+nat+'%22+(name+OR+address)'},
+  {n:'Google → Justdial',h:'https://www.google.com/search?q=%22'+nat+'%22+site%3Ajustdial.com'},
+  {n:'Google → OLX',h:'https://www.google.com/search?q=%22'+nat+'%22+site%3Aolx.in'},
+  {n:'Google → Facebook',h:'https://www.google.com/search?q=%22'+nat+'%22+site%3Afacebook.com'},
+  {n:'Bing',h:'https://www.bing.com/search?q=%22'+nat+'%22'},
+  {n:'Yandex',h:'https://yandex.com/search/?text='+nat}]);
+ out.innerHTML=html;
+
+ const slot=document.getElementById('wm-slot');
+ slot.outerHTML='<div id="wmc"></div>';
+ webMentions('"'+nat+'" OR "'+e164+'"',document.getElementById('wmc'));
+
+ const tr=await fetchAny('https://www.truecaller.com/search/'+(iso||'in').toLowerCase()+'/'+nat);
+ if(!tr.ok){done('tc','e','<p class="hint">Cloudflare block — manual open kar.</p>')}
+ else{
+  const t=(tr.txt.match(/<title[^>]*>([^<]*)<\/title>/i)||[])[1]||'';
+  const og=(tr.txt.match(/property="og:image"\s+content="([^"]+)"/i)||[])[1]||'';
+  const nm=t.replace(/\s*[|\-–]\s*Truecaller.*/i,'').replace(/^Search.*$/i,'').trim();
+  if(nm&&nm.toLowerCase()!=='truecaller'&&nm.length>2){
+   done('tc','f',`<div class="prof">${og?`<img class="avatar" src="${esc(og)}">`:''}
+   <div class="kv"><b>Name / tag</b><span style="font-size:15px;color:var(--acc)">${esc(nm)}</span></div></div>`);
+   STATE.tcName=nm;
+  } else done('tc','x','<p class="hint">Truecaller pe naam nahi mila (ya JS-rendered). Manual open kar.</p>');
+ }
+
+ const sr=await fetchAny('https://sync.me/search/?number='+encodeURIComponent(e164));
+ if(!sr.ok){done('sm','e','<p class="hint">block</p>')}
+ else{
+  const t=(sr.txt.match(/<title[^>]*>([^<]*)<\/title>/i)||[])[1]||'';
+  const nm=t.replace(/\s*[|\-–]\s*Sync.*/i,'').trim();
+  if(nm&&nm.length>2&&!/^search|^sync/i.test(nm)){done('sm','f',`<div class="kv"><b>Name</b><span style="color:var(--acc)">${esc(nm)}</span></div>`);STATE.smName=nm}
+  else done('sm','x','<p class="hint">nahi mila</p>');
+ }
+
+ const gr=await fetchAny('https://t.me/+'+e164d(e164));
+ if(!gr.ok){done('tg','e','<p class="hint">block</p>')}
+ else{
+  const t=(gr.txt.match(/property="og:title"\s+content="([^"]*)"/i)||gr.txt.match(/<div class="tgme_page_title"[^>]*>([^<]+)</i)||[])[1]||'';
+  const ph=(gr.txt.match(/property="og:image"\s+content="([^"]+)"/i)||[])[1]||'';
+  if(t&&!/telegram/i.test(t)){done('tg','f',`<div class="prof">${ph?`<img class="avatar" src="${esc(ph)}">`:''}
+   <div class="kv"><b>Telegram name</b><span style="color:var(--acc)">${esc(t)}</span></div></div>`);STATE.tgName=t}
+  else done('tg','x','<p class="hint">Telegram pe nahi mila</p>');
+ }
+
+ const k=K();
+ if(k.veriphone){
+  try{const d=await jget('https://api.veriphone.io/v2/verify?phone='+encodeURIComponent(e164)+'&key='+k.veriphone);
+  done('vp','f',`<div class="kv"><b>Carrier</b><span>${esc(d.carrier||'—')}</span><b>Region</b><span>${esc(d.region||'—')}</span><b>Type</b><span>${esc(d.phone_type||'—')}</span></div>`)}
+  catch(e){done('vp','e','<p class="hint">key fail</p>')}
+ } else if(k.phone){
+  try{const d=await jget('https://phonevalidation.abstractapi.com/v1/?api_key='+k.phone+'&phone='+encodeURIComponent(e164));
+  done('ap','f',`<div class="kv"><b>Carrier</b><span>${esc(d.carrier||'—')}</span><b>Location</b><span>${esc(d.location||'—')}</span></div>`)}
+  catch(e){done('ap','e','<p class="hint">key fail</p>')}
+ }
+};
+
+/* ---- EMAIL ---- */
+window.runEmail=async()=>{
+ const em=$('#em').value.trim().toLowerCase(),out=$('#em-out');
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){out.innerHTML='<div class="errbox">Email galat hai.</div>';return}
+ const [loc,dom]=em.split('@'),h=md5(em);
+ STATE.email={email:em,domain:dom};
+ out.innerHTML=`<div class="card"><h3>email intel</h3><div class="kv">
+ <b>Email</b><span>${esc(em)}</span><b>Domain</b><span>${esc(dom)}</span>
+ <b>Hash</b><span style="font-size:11px;word-break:break-all">${h}</span></div></div>`;
+ out.innerHTML+=card('gv','gravatar','https://gravatar.com/'+h);
+ out.innerHTML+=card('kb','disposable check','https://open.kickbox.com/v1/disposable/'+encodeURIComponent(em));
+ out.innerHTML+=card('mx','mail server / dns','https://dns.google/query?name='+encodeURIComponent(dom)+'&type=MX');
+ out.innerHTML+=card('rd','domain whois','https://rdap.org/domain/'+encodeURIComponent(dom));
+ out.innerHTML+=card('er','emailrep reputation','https://emailrep.io/'+encodeURIComponent(em));
+ out.innerHTML+=card('lc','leakcheck','https://leakcheck.io/');
+ out.innerHTML+=card('gh','github accounts + commits','https://github.com/search?q='+encodeURIComponent(em));
+ out.innerHTML+=card('svc','service accounts');
+ out.innerHTML+=`<div id="wmc2"></div>`;
+ out.innerHTML+=links('breach dbs',[
+  {n:'Have I Been Pwned',h:'https://haveibeenpwned.com/account/'+encodeURIComponent(em)},
+  {n:'Epieos',h:'https://epieos.com/?q='+encodeURIComponent(em)+'&t=email'},
+  {n:'Intelligence X',h:'https://intelx.io/?s='+encodeURIComponent(em)},
+  {n:'DeHashed',h:'https://dehashed.com/'},{n:'Snusbase',h:'https://snusbase.com/'},
+  {n:'Hunter verifier',h:'https://hunter.io/email-verifier/'+encodeURIComponent(em)}]);
+ out.innerHTML+=links('dorks',[
+  {n:'Google exact',h:'https://www.google.com/search?q=%22'+encodeURIComponent(em)+'%22'},
+  {n:'Google → pastebin',h:'https://www.google.com/search?q=%22'+encodeURIComponent(em)+'%22+site%3Apastebin.com'},
+  {n:'Google → PDF',h:'https://www.google.com/search?q=%22'+encodeURIComponent(em)+'%22+filetype%3Apdf'},
+  {n:'crt.sh',h:'https://crt.sh/?q=%25.'+encodeURIComponent(dom)}]);
+
+ try{const d=await jget('https://open.kickbox.com/v1/disposable/'+encodeURIComponent(em));
+  done('kb',d.disposable?'f':'x',`<div class="kv"><b>Disposable</b><span>${d.disposable?'<span class="pill no">YES</span>':'<span class="pill ok">NO</span>'}</span></div>`)}
+ catch(e){done('kb','e','<p class="hint">fail</p>')}
+
+ try{
+  const d=await jget('https://dns.google/resolve?name='+encodeURIComponent(dom)+'&type=MX');
+  const mx=(d.Answer||[]).filter(a=>a.type===15).map(a=>a.data.split(/\s+/).pop());
+  done('mx',mx.length?'f':'x',mx.length?`<div class="mono-out">${esc(mx.join('\n'))}</div>`:'<p class="hint">MX nahi — mail nahi le sakta</p>');
+  const t=await jget('https://dns.google/resolve?name='+encodeURIComponent(dom)+'&type=TXT');
+  const txt=(t.Answer||[]).map(a=>a.data).join(' ');
+  const svc=[];if(/google-site-verification/.test(txt))svc.push('Google Workspace');
+  if(/MS=ms/.test(txt))svc.push('Microsoft 365');if(/atlassian/.test(txt))svc.push('Atlassian');
+  if(/shopify/.test(txt))svc.push('Shopify');if(/stripe/.test(txt))svc.push('Stripe');
+  if(/v=spf1/.test(txt))svc.push('SPF present');
+  if(svc.length)document.querySelector('#svc .body').insertAdjacentHTML('beforeend',`<div class="mono-out">${esc(svc.join('\n'))}</div>`);
+ }catch(e){done('mx','e','<p class="hint">DNS fail</p>')}
+
+ try{const d=await jget('https://rdap.org/domain/'+encodeURIComponent(dom));
+  const ev=(d.events||[]).find(x=>x.eventAction==='registration');
+  const reg=(d.entities||[]).find(x=>x.roles?.includes('registrar'));
+  done('rd','f',`<div class="kv"><b>Registered</b><span>${ev?esc(ev.eventDate.slice(0,10)):'—'}</span>
+  <b>Registrar</b><span>${reg?esc(reg.vcardArray?.[1]?.find(v=>v[0]==='fn')?.[3]||'—'):'—'}</span></div>`)}
+ catch(e){done('rd','e','<p class="hint">no RDAP</p>')}
+
+ const er=await fetchAny('https://emailrep.io/'+encodeURIComponent(em));
+ if(!er.ok)done('er','e','<p class="hint">rate limited — manual open</p>');
+ else{try{const d=JSON.parse(er.txt);
+  const row=(k,v)=>`<b>${k}</b><span>${esc(String(v))}</span>`;
+  done('er',d.reputation&&d.reputation!=='none'?'f':'x',`<div class="kv">
+  ${row('Reputation',d.reputation||'—')}${row('Suspicious',d.suspicious)}
+  ${row('Profiles',(d.details?.profiles||[]).join(', ')||'—')}
+  ${row('Domain exists',d.details?.domain_exists)}${row('Breaches',d.details?.breaches)}
+  ${row('Data breach',d.details?.data_breach)}${row('Blacklisted',d.details?.blacklisted)}</div>`)}
+  catch(e){done('er','e','<p class="hint">parse fail</p>')}}
+
+ const lc=await fetchAny('https://leakcheck.io/api/public?check='+encodeURIComponent(em));
+ if(!lc.ok)done('lc','e','<p class="hint">block</p>');
+ else{try{const d=JSON.parse(lc.txt);
+  done('lc',d.found?'f':'x',d.found?`<div class="mono-out">${esc((d.sources||[]).map(s=>s.name).join('\n')||'found')}</div>`:'<p class="hint">koi public leak nahi</p>')}
+  catch(e){done('lc','e','<p class="hint">parse fail</p>')}}
+
+ try{
+  const u=await jget('https://api.github.com/search/users?q='+encodeURIComponent(em)+'+in:email');
+  const c=await fetch('https://api.github.com/search/commits?q=author-email:'+encodeURIComponent(em),
+   {headers:{Accept:'application/vnd.github.cloak-preview'}}).then(r=>r.json()).catch(()=>null);
+  let o='';
+  (u.items||[]).slice(0,5).forEach(i=>o+=`<div class="res"><b><a href="${esc(i.html_url)}" target="_blank">${esc(i.login)}</a></b><span>github user</span></div>`);
+  if(c&&c.items)(c.items||[]).slice(0,5).forEach(i=>o+=`<div class="res"><b><a href="${esc(i.html_url)}" target="_blank">${esc(i.repository?.full_name||'commit')}</a></b>
+  <span>author: ${esc(i.commit?.author?.name||'')} — ${esc((i.commit?.message||'').slice(0,70))}</span></div>`);
+  done('gh',o?'f':'x',o||'<p class="hint">koi public github activity nahi</p>');
+ }catch(e){done('gh','e','<p class="hint">rate limited</p>')}
+
+ const probes=[
+  ['Duolingo','https://www.duolingo.com/2017-06-30/users?email='+encodeURIComponent(em),d=>d.users&&d.users.length],
+  ['WordPress','https://public-api.wordpress.com/rest/v1.1/users/email/'+encodeURIComponent(em),d=>d.ID],
+  ['Pinterest','https://www.pinterest.com/resource/EmailExistsResource/get/?source_url=%2F&data=%7B%22options%22%3A%7B%22email%22%3A%22'+encodeURIComponent(em)+'%22%7D%7D',d=>JSON.stringify(d).includes('"exists":true')||JSON.stringify(d).includes('"status":"success"')]
+ ];
+ let so='';
+ for(const [n,u,ok] of probes){
+  try{const r=await fetchAny(u);if(!r.ok){so+=`<div class="res"><b>${n}</b><span>blocked</span></div>`;continue}
+   const d=JSON.parse(r.txt);
+   so+=`<div class="res"><b>${n}</b><span>${ok(d)?'<span class="pill ok">ACCOUNT EXISTS</span>':'<span class="pill no">not found</span>'}</span></div>`;
+  }catch(e){so+=`<div class="res"><b>${n}</b><span>parse fail</span></div>`}
+ }
+ done('svc',so.includes('EXISTS')?'f':'x',so);
+
+ try{const d=await jget('https://gravatar.com/'+h+'.json');const p=d.entry[0];
+  done('gv','f',`<div class="prof"><img class="avatar" src="${esc(p.thumbnailUrl)}">
+  <div class="kv"><b>Name</b><span style="color:var(--acc)">${esc(p.name?.formatted||'—')}</span>
+  <b>Username</b><span>${esc(p.preferredUsername||'—')}</span>
+  <b>About</b><span>${esc(p.aboutMe||'—')}</span>
+  <b>Location</b><span>${esc(p.currentLocation||'—')}</span>
+  <b>Links</b><span>${esc((p.urls||[]).map(x=>x.value).join(', ')||'—')}</span></div></div>`);
+  STATE.gravatar=p.name?.formatted||p.preferredUsername;
+ }catch(e){done('gv','x','<p class="hint">koi gravatar nahi</p>')}
+
+ webMentions('"'+em+'"',document.getElementById('wmc2'));
+
+ if(K().email){
+  try{const d=await jget('https://emailvalidation.abstractapi.com/v1/?api_key='+K().email+'&email='+encodeURIComponent(em));
+  document.querySelector('#svc .body').insertAdjacentHTML('beforeend',
+  `<div class="mono-out">AbstractAPI → deliverability: ${esc(d.deliverability||'?')}, smtp: ${d.is_smtp_valid}</div>`)}catch(e){}
+ }
+};
+
+/* ---- USERNAME ---- */
+const SITES=[
+ {n:'GitHub',c:'Dev',u:'https://github.com/{u}',a:'gh'},{n:'GitLab',c:'Dev',u:'https://gitlab.com/{u}'},
+ {n:'Bitbucket',c:'Dev',u:'https://bitbucket.org/{u}/'},{n:'npm',c:'Dev',u:'https://www.npmjs.com/~{u}',a:'npm'},
+ {n:'PyPI',c:'Dev',u:'https://pypi.org/user/{u}/'},{n:'Docker Hub',c:'Dev',u:'https://hub.docker.com/u/{u}'},
+ {n:'Dev.to',c:'Dev',u:'https://dev.to/{u}'},{n:'CodePen',c:'Dev',u:'https://codepen.io/{u}'},
+ {n:'Replit',c:'Dev',u:'https://replit.com/@{u}'},{n:'Kaggle',c:'Dev',u:'https://www.kaggle.com/{u}'},
+ {n:'Hacker News',c:'Dev',u:'https://news.ycombinator.com/user?id={u}',a:'hn'},
+ {n:'Hashnode',c:'Dev',u:'https://hashnode.com/@{u}'},{n:'Codeforces',c:'Dev',u:'https://codeforces.com/profile/{u}'},
+ {n:'HackerOne',c:'Dev',u:'https://hackerone.com/{u}'},{n:'Bugcrowd',c:'Dev',u:'https://bugcrowd.com/{u}'},
+ {n:'Product Hunt',c:'Dev',u:'https://www.producthunt.com/@{u}'},{n:'WakaTime',c:'Dev',u:'https://wakatime.com/@{u}'},
+ {n:'Instagram',c:'Social',u:'https://www.instagram.com/{u}/'},{n:'Facebook',c:'Social',u:'https://www.facebook.com/{u}'},
+ {n:'X / Twitter',c:'Social',u:'https://x.com/{u}'},{n:'Threads',c:'Social',u:'https://www.threads.net/@{u}'},
+ {n:'TikTok',c:'Social',u:'https://www.tiktok.com/@{u}'},{n:'Snapchat',c:'Social',u:'https://www.snapchat.com/add/{u}'},
+ {n:'Pinterest',c:'Social',u:'https://www.pinterest.com/{u}/'},{n:'Reddit',c:'Social',u:'https://www.reddit.com/user/{u}',a:'rd'},
+ {n:'Telegram',c:'Social',u:'https://t.me/{u}'},{n:'Bluesky',c:'Social',u:'https://bsky.app/profile/{u}.bsky.social',a:'bsky'},
+ {n:'Mastodon',c:'Social',u:'https://mastodon.social/@{u}'},{n:'YouTube',c:'Social',u:'https://www.youtube.com/@{u}'},
+ {n:'Vimeo',c:'Social',u:'https://vimeo.com/{u}'},{n:'Twitch',c:'Social',u:'https://www.twitch.tv/{u}'},
+ {n:'Tumblr',c:'Social',u:'https://{u}.tumblr.com'},{n:'Flickr',c:'Social',u:'https://www.flickr.com/people/{u}'},
+ {n:'VSCO',c:'Social',u:'https://vsco.co/{u}'},{n:'VK',c:'Social',u:'https://vk.com/{u}'},{n:'OK.ru',c:'Social',u:'https://ok.ru/{u}'},
+ {n:'Medium',c:'Writing',u:'https://medium.com/@{u}'},{n:'Substack',c:'Writing',u:'https://{u}.substack.com'},
+ {n:'WordPress',c:'Writing',u:'https://{u}.wordpress.com'},{n:'Blogger',c:'Writing',u:'https://{u}.blogspot.com'},
+ {n:'Trello',c:'Writing',u:'https://trello.com/{u}'},{n:'SlideShare',c:'Writing',u:'https://www.slideshare.net/{u}'},
+ {n:'Scribd',c:'Writing',u:'https://www.scribd.com/{u}'},{n:'Issuu',c:'Writing',u:'https://issuu.com/{u}'},
+ {n:'Pastebin',c:'Writing',u:'https://pastebin.com/u/{u}'},{n:'Disqus',c:'Writing',u:'https://disqus.com/by/{u}'},
+ {n:'Steam',c:'Gaming',u:'https://steamcommunity.com/id/{u}'},{n:'Roblox',c:'Gaming',u:'https://www.roblox.com/user.aspx?username={u}'},
+ {n:'Chess.com',c:'Gaming',u:'https://www.chess.com/member/{u}',a:'chess'},{n:'Lichess',c:'Gaming',u:'https://lichess.org/@/{u}',a:'lichess'},
+ {n:'Itch.io',c:'Gaming',u:'https://{u}.itch.io'},{n:'Duolingo',c:'Gaming',u:'https://www.duolingo.com/profile/{u}'},
+ {n:'Behance',c:'Creative',u:'https://www.behance.net/{u}'},{n:'Dribbble',c:'Creative',u:'https://dribbble.com/{u}'},
+ {n:'Figma',c:'Creative',u:'https://www.figma.com/@{u}'},{n:'SoundCloud',c:'Creative',u:'https://soundcloud.com/{u}'},
+ {n:'Bandcamp',c:'Creative',u:'https://{u}.bandcamp.com'},{n:'Mixcloud',c:'Creative',u:'https://www.mixcloud.com/{u}'},
+ {n:'Last.fm',c:'Creative',u:'https://www.last.fm/user/{u}'},{n:'Letterboxd',c:'Creative',u:'https://letterboxd.com/{u}'},
+ {n:'Goodreads',c:'Creative',u:'https://www.goodreads.com/{u}'},{n:'Trakt',c:'Creative',u:'https://trakt.tv/users/{u}'},
+ {n:'Keybase',c:'Identity',u:'https://keybase.io/{u}',a:'keybase'},{n:'Gravatar',c:'Identity',u:'https://gravatar.com/{u}'},
+ {n:'About.me',c:'Identity',u:'https://about.me/{u}'},{n:'Linktree',c:'Identity',u:'https://linktr.ee/{u}'},
+ {n:'Carrd',c:'Identity',u:'https://{u}.carrd.co'},{n:'Credly',c:'Identity',u:'https://www.credly.com/users/{u}'},
+ {n:'Patreon',c:'Money',u:'https://www.patreon.com/{u}'},{n:'Ko-fi',c:'Money',u:'https://ko-fi.com/{u}'},
+ {n:'Buy Me a Coffee',c:'Money',u:'https://www.buymeacoffee.com/{u}'}
+];
+const CHK={
+ async gh(q){const r=await fetch('https://api.github.com/users/'+encodeURIComponent(q));
+  if(r.status===404)return{s:'no'};if(!r.ok)return{s:'e'};const d=await r.json();
+  return{s:'yes',x:{av:d.avatar_url,n:d.name,b:d.bio,l:d.location,w:d.blog,r:d.public_repos,f:d.followers,j:d.created_at}}},
+ async bsky(q){const r=await fetch('https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?handle='+encodeURIComponent(q)+'.bsky.social');
+  return{s:r.ok?'yes':'no'}},
+ async keybase(q){const d=await jget('https://keybase.io/_/api/1.0/user/lookup.json?username='+encodeURIComponent(q));
+  return{s:d.status?.code===0?'yes':'no'}},
+ async hn(q){const d=await jget('https://hacker-news.firebaseio.com/v0/user/'+encodeURIComponent(q)+'.json');
+  return{s:d?'yes':'no',x:d?{k:d.karma}:null}},
+ async chess(q){const r=await fetch('https://api.chess.com/pub/player/'+encodeURIComponent(q));return{s:r.ok?'yes':'no'}},
+ async lichess(q){const r=await fetch('https://lichess.org/api/user/'+encodeURIComponent(q));return{s:r.ok?'yes':'no'}},
+ async rd(q){const r=await fetch('https://www.reddit.com/user/'+encodeURIComponent(q)+'/about.json');
+  if(!r.ok)return{s:'e'};const d=await r.json();return{s:d.data?.name?'yes':'no',x:d.data?{k:d.data.total_karma}:null}},
+ async npm(q){const d=await jget('https://registry.npmjs.org/-/v1/search?text=maintainer:'+encodeURIComponent(q)+'&size=1');
+  return{s:d.total>0?'yes':'no'}}
+};
+window.runUser=async()=>{
+ const q=$('#un').value.trim().replace(/^@/,''),out=$('#un-out');
+ if(!q){out.innerHTML='<div class="errbox">Username daalo.</div>';return}
+ STATE.user={username:q,found:[]};
+ let html=`<div class="card"><h3>scanning “${esc(q)}”</h3>
+ <p class="hint">${SITES.filter(s=>s.a).length} auto-verify + web mentions.</p></div><div id="prof"></div><div id="wmc3"></div>`;
+ for(const c of [...new Set(SITES.map(s=>s.c))]){
+  html+=`<div class="cat">${esc(c)}</div><div class="grid">`+
+  SITES.filter(s=>s.c===c).map(s=>`<div class="item" id="s-${s.n.replace(/[^a-z]/gi,'')}">
+  <span class="dot ${s.a?'e':''}"></span><span class="nm">${esc(s.n)}</span>
+  <a href="${esc(s.u.replace('{u}',encodeURIComponent(q)))}" target="_blank" rel="noopener" data-h="${esc(s.u.replace('{u}',encodeURIComponent(q)))}">OPEN</a></div>`).join('')+'</div>';
+ }
+ out.innerHTML=html;
+ const queue=SITES.filter(s=>s.a);let i=0;
+ async function wk(){while(i<queue.length){const s=queue[i++];const el=document.getElementById('s-'+s.n.replace(/[^a-z]/gi,''));
+  const dot=el.querySelector('.dot');
+  try{const r=await CHK[s.a](q);
+   dot.className='dot '+(r.s==='yes'?'f':r.s==='no'?'x':'e');
+   if(r.s==='yes'){STATE.user.found.push(s.n);const a=el.querySelector('a');a.textContent='FOUND';a.style.color='var(--acc)';
+    if(r.x?.av)document.getElementById('prof').innerHTML=`<div class="card"><h3>github profile</h3><div class="prof">
+    <img class="avatar" src="${esc(r.x.av)}"><div class="kv"><b>Name</b><span style="color:var(--acc)">${esc(r.x.n||'—')}</span>
+    <b>Bio</b><span>${esc(r.x.b||'—')}</span><b>Location</b><span>${esc(r.x.l||'—')}</span>
+    <b>Site</b><span>${r.x.w?`<a href="${esc(r.x.w)}" target="_blank">${esc(r.x.w)}</a>`:'—'}</span>
+    <b>Repos</b><span>${esc(r.x.r)}</span><b>Followers</b><span>${esc(r.x.f)}</span>
+    <b>Joined</b><span>${esc(String(r.x.j).slice(0,10))}</span></div></div></div>`;
+   } else if(r.s==='no')el.style.opacity='.4';
+  }catch(e){dot.className='dot e'}
+ }}
+ await Promise.all(Array.from({length:5},wk));
+ out.insertAdjacentHTML('beforeend',`<div class="card"><h3>summary</h3><p class="hint">
+ Confirmed: <b style="color:var(--acc)">${STATE.user.found.length}</b> — ${esc(STATE.user.found.join(', ')||'none')}</p></div>`);
+ webMentions('"'+q+'"',document.getElementById('wmc3'));
+ try{const d=await jget('https://api.genderize.io/?name='+encodeURIComponent(q));
+ if(d.gender)document.getElementById('prof').insertAdjacentHTML('afterend',
+ `<div class="card"><h3>name guess</h3><div class="kv"><b>Gender</b><span>${esc(d.gender)} (${Math.round(d.probability*100)}%)</span></div></div>`)}catch(e){}
+};
+window.openAllLinks=()=>{const l=[...document.querySelectorAll('#un-out a[data-h]')].slice(0,12);
+ if(!l.length){toast('pehle scan');return}l.forEach((a,i)=>setTimeout(()=>window.open(a.dataset.h,'_blank'),i*160))};
+
+window.dlReport=()=>{
+ let t='KHOJ REPORT '+new Date().toISOString()+'\n'+'='.repeat(40)+'\n\n'+JSON.stringify(STATE,null,2)+'\n\nLINKS\n';
+ document.querySelectorAll('.item a[href]').forEach(a=>{t+=(a.closest('.item')?.querySelector('.nm')?.textContent||'')+' -> '+a.href+'\n'});
+ const b=new Blob([t],{type:'text/plain'}),u=URL.createObjectURL(b),a=document.createElement('a');
+ a.href=u;a.download='khoj-'+Date.now()+'.txt';a.click();URL.revokeObjectURL(u);toast('saved')};
+
+$('#ph').onkeydown=e=>e.key==='Enter'&&runPhone();
+$('#em').onkeydown=e=>e.key==='Enter'&&runEmail();
+$('#un').onkeydown=e=>e.key==='Enter'&&runUser();
+</script>
+</body>
+</html>
