@@ -1,1 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KHOJ — OSINT Recon</title>
+<link rel="icon" href="data:,">
+<style>
+:root{--bg:#070a09;--card:#101716;--c2:#0c1312;--ln:#1d2a27;--fg:#dbe9e5;--dm:#7b918c;--ac:#00e6a0;--ac2:#22d3ee;--wr:#f5b642;--bd:#ff5f6d;--m:ui-monospace,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1100px 500px at 50% -12%,#0c2b22 0,transparent 65%),var(--bg);background-attachment:fixed;color:var(--fg);font-family:var(--m);font-size:14px;line-height:1.5}
+a{color:var(--ac2);text-decoration:none}
+.w{max-width:1060px;margin:0 auto;padding:0 14px 90px}
+header{padding:20px 0 12px;border-bottom:1px solid var(--ln);margin-bottom:12px}
+.br{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.lg{font-size:24px;font-weight:800;letter-spacing:6px;color:var(--ac);text-shadow:0 0 18px rgba(0,230,160,.5)}
+.lg i{color:var(--ac2);font-style:normal}
+.tg{color:var(--dm);font-size:11px;letter-spacing:1.6px;text-transform:uppercase}
+.ha{margin-left:auto;display:flex;gap:7px}
+.tabs{display:flex;gap:7px;margin:12px 0;flex-wrap:wrap}
+.tab{background:var(--card);border:1px solid var(--ln);color:var(--dm);padding:10px 14px;border-radius:9px;cursor:pointer;font-family:var(--m);font-size:13px}
+.tab.on{background:rgba(0,230,160,.12);border-color:var(--ac);color:var(--ac)}
+.p{display:none}.p.on{display:block}
+.r{display:flex;gap:7px;flex-wrap:wrap}
+input,select,button{font-family:var(--m);font-size:14px}
+input,select{flex:1 1 190px;min-width:0;background:var(--c2);color:var(--fg);border:1px solid var(--ln);border-radius:9px;padding:12px 13px;outline:none}
+input:focus,select:focus{border-color:var(--ac)}
+select{flex:0 1 115px}
+.go{background:linear-gradient(180deg,#00e6a0,#00b47e);color:#04120d;border:0;border-radius:9px;padding:12px 20px;font-weight:800;letter-spacing:.8px;cursor:pointer}
+.gh{background:var(--card);border:1px solid var(--ln);color:var(--dm);border-radius:8px;padding:8px 11px;cursor:pointer;font-size:12px}
+.cd{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:13px;margin-top:11px}
+.cd h3{margin:0 0 9px;font-size:11.5px;letter-spacing:1.6px;text-transform:uppercase;color:var(--ac);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.cd h3 .s{margin-left:auto}
+.kv{display:grid;grid-template-columns:118px 1fr;gap:6px 10px;font-size:13px}
+.kv b{color:var(--dm);font-weight:400}
+.gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:6px}
+.it{display:flex;align-items:center;gap:7px;background:var(--c2);border:1px solid var(--ln);border-radius:8px;padding:8px 9px;font-size:12.5px}
+.it .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.it a{font-size:11px;padding:3px 6px;border:1px solid var(--ln);border-radius:6px;color:var(--dm)}
+.dt{width:7px;height:7px;border-radius:50%;background:#3a4a47;flex:0 0 auto}
+.dt.f{background:var(--ac);box-shadow:0 0 7px var(--ac)}.dt.x{background:var(--bd)}.dt.e{background:var(--wr)}
+.pl{font-size:10px;padding:2px 7px;border-radius:5px;border:1px solid var(--ln);color:var(--dm);white-space:nowrap}
+.pl.ok{color:var(--ac);border-color:rgba(0,230,160,.5);background:rgba(0,230,160,.1)}
+.pl.no{color:var(--bd);border-color:rgba(255,95,109,.45);background:rgba(255,95,109,.1)}
+.pl.un{color:var(--wr);border-color:rgba(245,182,66,.4);background:rgba(245,182,66,.1)}
+.hn{color:var(--dm);font-size:12px;margin:9px 0 0}
+.er{border-left:2px solid var(--bd);background:rgba(255,95,109,.08);padding:10px;border-radius:0 8px 8px 0;font-size:12.5px}
+.ct{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--dm);margin:16px 0 7px;border-bottom:1px dashed var(--ln);padding-bottom:5px}
+.av{width:64px;height:64px;border-radius:50%;border:1px solid var(--ac);object-fit:cover;background:#000}
+.pf{display:flex;gap:13px;align-items:flex-start}
+.mo{background:#050908;border:1px solid var(--ln);border-radius:8px;padding:10px;font-size:12px;white-space:pre-wrap;word-break:break-all;max-height:240px;overflow:auto}
+.rs{border-left:2px solid var(--ln);padding:6px 0 6px 9px;margin:7px 0;font-size:12.5px}
+.rs b{display:block;color:var(--ac2);font-weight:500}
+.rs span{color:var(--dm);font-size:11.5px}
+.qb{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:7px;margin-top:11px}
+.qb a{display:block;text-align:center;background:rgba(0,230,160,.09);border:1px solid rgba(0,230,160,.35);color:var(--ac);padding:11px 8px;border-radius:9px;font-size:12px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{background:rgba(34,211,238,.13);border:1px solid rgba(34,211,238,.5);color:var(--ac2);padding:6px 11px;border-radius:6px;font-size:12.5px;cursor:pointer}
+.sum{border:1px solid rgba(0,230,160,.45);background:rgba(0,230,160,.07);border-radius:12px;padding:13px;margin-top:11px}
+.sum h3{color:var(--ac);margin:0 0 8px;font-size:12px;letter-spacing:1.5px;text-transform:uppercase}
+footer{margin-top:40px;border-top:1px solid var(--ln);padding-top:14px;color:var(--dm);font-size:11.5px}
+#ts{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ac);color:#04120d;padding:10px 17px;border-radius:8px;font-weight:700;font-size:12.5px;opacity:0;transition:.25s;z-index:99}
+#ts.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#md{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;place-items:center;padding:14px;z-index:100}
+#md.on{display:grid}
+#md .bx{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:18px;max-width:540px;width:100%;max-height:90vh;overflow:auto}
+#md label{display:block;font-size:11px;color:var(--dm);margin:11px 0 4px}
+#md input{width:100%}
+#md pre{background:#050908;border:1px solid var(--ln);border-radius:8px;padding:9px;font-size:10px;color:#9fe8cd;white-space:pre-wrap;max-height:170px;overflow:auto}
+.sp{display:inline-block;width:11px;height:11px;border:2px solid var(--ln);border-top-color:var(--ac);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.bar{height:4px;background:var(--ln);border-radius:4px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:0;background:var(--ac);transition:width .3s}
+@media(max-width:560px){.kv{grid-template-columns:1fr}.lg{font-size:20px;letter-spacing:4px}}
+</style>
+</head>
+<body>
+<div class="w">
+<header><div class="br"><div class="lg">KH<i>O</i>J</div><div class="tg">deep osint recon</div>
+<div class="ha"><button class="gh" onclick="openKeys()">⚙ SETUP</button><button class="gh" onclick="dlReport()">💾 REPORT</button></div></div></header>
+<div class="tabs"><button class="tab on" data-tab="phone">📞 PHONE</button><button class="tab" data-tab="email">✉️ EMAIL</button><button class="tab" data-tab="user">👤 USERNAME</button></div>
 
+<div class="p on" id="p-phone">
+<div class="r"><select id="cc"><option value="IN" selected>🇮🇳 +91</option><option value="US">🇺🇸 +1</option><option value="GB">🇬🇧 +44</option><option value="AE">🇦🇪 +971</option><option value="PK">🇵🇰 +92</option><option value="NP">🇳🇵 +977</option><option value="BD">🇧🇩 +880</option><option value="SA">🇸🇦 +966</option><option value="AU">🇦🇺 +61</option><option value="SG">🇸🇬 +65</option><option value="DE">🇩🇪 +49</option></select>
+<input id="ph" placeholder="9876543210" autocomplete="off"><button class="go" onclick="runPhone()">SCAN</button></div>
+<p class="hn">Naam, photo, email, Telegram, web mentions — sab automatic.</p><div id="ph-out"></div></div>
+
+<div class="p" id="p-email">
+<div class="r"><input id="em" placeholder="someone@example.com" autocomplete="off"><button class="go" onclick="runEmail()">SCAN</button></div>
+<p class="hn">Gravatar, leaks, GitHub commits, accounts, web mentions.</p><div id="em-out"></div></div>
+
+<div class="p" id="p-user">
+<div class="r"><input id="un" placeholder="username" autocomplete="off"><button class="go" onclick="runUser()">SCAN</button><button class="gh" onclick="openAll()">OPEN ALL</button></div>
+<p class="hn">55+ platforms auto-verify.</p><div id="un-out"></div></div>
+
+<footer><b>KHOJ</b> — sab browser me. SETUP me proxy daal aur TEST dabake check kar ki chal raha hai ya nahi.</footer>
+</div>
+
+<div id="md"><div class="bx"><h3 style="margin:0;color:var(--ac);letter-spacing:1.5px">SETUP</h3>
+<label style="color:var(--ac)">CUSTOM PROXY (must)</label>
+<p class="hn">Cloudflare Worker bana, neeche wala code paste kar, deploy kar, URL yahan daal.</p>
+<pre id="wc">export default {
+  async fetch(req) {
+    const u = new URL(req.url).searchParams.get('url');
+    if (!u) return new Response('use ?url=', { status: 400 });
+    const r = await fetch(u, { headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } });
+    return new Response(r.body, { headers: { 'access-control-allow-origin': '*', 'content-type': r.headers.get('content-type') || 'text/html' } });
+  }
+};</pre>
+<button class="gh" onclick="copy(document.getElementById('wc').textContent)">COPY CODE</button>
+<label>CUSTOM PROXY URL (end with ?url=)</label><input id="k-proxy" placeholder="https://khoj.xxx.workers.dev/?url=">
+<label>VERIPHONE (free key)</label><input id="k-veriphone">
+<label>ABSTRACTAPI PHONE</label><input id="k-phone">
+<label>ABSTRACTAPI EMAIL</label><input id="k-email">
+<div style="display:flex;gap:7px;margin-top:14px"><button class="go" onclick="saveKeys()">SAVE</button>
+<button class="gh" onclick="document.getElementById('md').classList.remove('on')">CLOSE</button></div>
+<div class="ct">proxy health test</div>
+<button class="gh" onclick="testPx()">▶ TEST ALL PROXIES</button>
+<div id="ptest" class="hn"></div>
+</div></div>
+<div id="ts"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/libphonenumber-js@1.11.9/bundle/libphonenumber-max.js" defer></script>
+<script>
+function $(s){return document.querySelector(s)}
+function $$(s){return [].slice.call(document.querySelectorAll(s))}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(m){var t=$('#ts');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},1400)}
+function copy(t){navigator.clipboard.writeText(t).then(function(){toast('Copied')})}
+function K(){try{return JSON.parse(localStorage.getItem('khoj_keys')||'{}')}catch(e){return{}}}
+function openKeys(){var k=K();['proxy','veriphone','phone','email'].forEach(function(n){$('#k-'+n).value=k[n]||''});$('#md').classList.add('on')}
+function saveKeys(){var o={};['proxy','veriphone','phone','email'].forEach(function(n){o[n]=$('#k-'+n).value.trim()});localStorage.setItem('khoj_keys',JSON.stringify(o));$('#md').classList.remove('on');toast('Saved')}
+$$('.tab').forEach(function(b){b.onclick=function(){$$('.tab').forEach(function(x){x.classList.remove('on')});b.classList.add('on');$$('.p').forEach(function(p){p.classList.remove('on')});$('#p-'+b.dataset.tab).classList.add('on')}});
+
+var PX=[function(u){return 'https://r.jina.ai/'+u},function(u){return 'https://api.codetabs.com/v1/proxy/?quest='+encodeURIComponent(u)},function(u){return 'https://api.allorigins.win/raw?url='+encodeURIComponent(u)},function(u){return 'https://test.cors.workers.dev/?'+u},function(u){return 'https://cors.eu.org/'+u},function(u){return 'https://api.cors.lol/?url='+encodeURIComponent(u)},function(u){return 'https://corsproxy.io/?url='+encodeURIComponent(u)}];
+var PXN=['jina','codetabs','allorigins','cors.workers.dev','cors.eu.org','cors.lol','corsproxy.io'];
+function pxList(u){var c=K().proxy,o=[];if(c)o.push(c+encodeURIComponent(u));return o.concat(PX.map(function(f){return f(u)}))}
+function pxNames(){var n=[];if(K().proxy)n.push('YOUR WORKER');return n.concat(PXN)}
+function get(url,ms){ms=ms||9000;return new Promise(function(res){var L=pxList(url),i=0;(function nx(){if(i>=L.length)return res(null);var c=new AbortController(),id=setTimeout(function(){c.abort()},ms);fetch(L[i++],{signal:c.signal,credentials:'omit'}).then(function(r){clearTimeout(id);return r.text()}).then(function(x){if(x.trimStart().indexOf('{"contents"')===0){try{x=JSON.parse(x).contents||''}catch(e){}}if(x&&x.length>40)return res(x);nx()}).catch(function(){clearTimeout(id);nx()})})()})}
+function js(url,ms){ms=ms||6000;var c=new AbortController(),id=setTimeout(function(){c.abort()},ms);return fetch(url,{signal:c.signal,credentials:'omit'}).then(function(r){clearTimeout(id);if(!r.ok)throw 0;return r.json()})}
+function meta(url){return js('https://api.dub.co/metatags?url='+encodeURIComponent(url),7000).then(function(d){if(d&&(d.title||d.image))return{title:d.title,desc:d.description,img:d.image};return null}).catch(function(){return js('https://api.microlink.io/?url='+encodeURIComponent(url)+'&meta=true',9000).then(function(d){if(d&&d.data)return{title:d.data.title,desc:d.data.description,img:(d.data.image&&d.data.image.url)||(d.data.logo&&d.data.logo.url)};return null}).catch(function(){return null})})}
+
+function testPx(){
+ var box=$('#ptest');box.innerHTML='testing…<br>';
+ var L=pxList('https://example.com/'),N=pxNames();
+ L.forEach(function(u,i){
+  var t0=Date.now();
+  fetch(u,{credentials:'omit'}).then(function(r){return r.text()}).then(function(x){
+   var ok=x.length>200&&/example/i.test(x);
+   box.innerHTML+=(ok?'✅ ':'⚠️ ')+esc(N[i])+' — '+(ok?'WORKS':'weird response')+' ('+(Date.now()-t0)+'ms)<br>';
+  }).catch(function(){box.innerHTML+='❌ '+esc(N[i])+' — FAIL ('+(Date.now()-t0)+'ms)<br>'});
+ });
+}
+
+var GEN=/truecaller|lookup|reverse phone|free phone|caller id|sync\.?me|phone number|telegram|search/i;
+function pickName(t){
+ if(!t)return '';
+ var lines=String(t).split('\n').map(function(x){return x.replace(/^[#*\->\s]+/,'').replace(/\[|\]|\(.*?\)/g,'').trim()}).filter(function(x){return x.length>2&&x.length<45});
+ for(var i=0;i<lines.length;i++){var l=lines[i];if(!GEN.test(l)&&/[A-Za-z]{3}/.test(l)&&!/^http/.test(l)&&!/^\d+$/.test(l))return l}
+ return ''
+}
+function extractEmails(t){
+ var m=String(t||'').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g)||[],seen={},out=[];
+ m.forEach(function(e){e=e.toLowerCase().replace(/[.,;:)\]]$/,'');
+  if(/\.(png|jpg|jpeg|gif|webp|svg|css|js)$/.test(e))return;
+  if(/sentry|example\.|wixpress|@2x|domain\.com|email\.com/.test(e))return;
+  if(e.length>45)return;
+  if(!seen[e]){seen[e]=1;out.push(e)}});
+ return out
+}
+
+function card(id,t,l){return '<div class="cd" id="'+id+'"><h3>'+esc(t)+'<span class="s sp"></span>'+(l?'<a href="'+esc(l)+'" target="_blank" rel="noopener" style="font-size:10px">open</a>':'')+'</h3><div class="body"></div></div>'}
+function done(id,st,h){var c=document.getElementById(id);if(!c)return;var s=c.querySelector('.sp');if(s)s.remove();var p=document.createElement('span');p.className='pl '+(st==='f'?'ok':st==='x'?'no':'un');p.textContent=st==='f'?'DATA':st==='x'?'EMPTY':'NO DATA';c.querySelector('h3').appendChild(p);c.querySelector('.body').innerHTML=h||''}
+function runAll(list,box){box.innerHTML=list.map(function(s){return card(s.id,s.t,s.l)}).join('');var bar=document.createElement('div');bar.className='bar';bar.innerHTML='<i></i>';box.insertBefore(bar,box.firstChild);var n=0;
+return Promise.all(list.map(function(s){return Promise.resolve().then(s.f).then(function(r){if(r&&r.h)done(s.id,r.st?'f':'x',r.h);else done(s.id,'e','<a class="pl un" href="'+esc(s.l)+'" target="_blank" rel="noopener">OPEN MANUALLY</a>')}).catch(function(){done(s.id,'e','<a class="pl un" href="'+esc(s.l)+'" target="_blank" rel="noopener">OPEN MANUALLY</a>')}).then(function(){bar.firstChild.style.width=Math.round(++n/list.length*100)+'%'})})).then(function(){bar.remove()})}
+
+function md5(str){var b=new TextEncoder().encode(str),bl=b.length*8,bf=new Uint8Array(Math.ceil((b.length+9)/64)*64);bf.set(b);bf[b.length]=0x80;var dv=new DataView(bf.buffer);dv.setUint32(bf.length-8,bl>>>0,true);dv.setUint32(bf.length-4,Math.floor(bl/4294967296),true);
+var Kc=[],i;for(i=0;i<64;i++)Kc.push(Math.floor(Math.abs(Math.sin(i+1))*4294967296)>>>0);
+var S=[7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+var a=0x67452301,c2=0xefcdab89,c3=0x98badcfe,c4=0x10325476,M=new Uint32Array(16);
+for(var o=0;o<bf.length;o+=64){for(i=0;i<16;i++)M[i]=dv.getUint32(o+i*4,true);var A=a,B=c2,C=c3,D=c4;
+for(i=0;i<64;i++){var F,g;if(i<16){F=(B&C)|(~B&D);g=i}else if(i<32){F=(D&B)|(~D&C);g=(5*i+1)%16}else if(i<48){F=B^C^D;g=(3*i+5)%16}else{F=C^(B|~D);g=(7*i)%16}
+var t=D;D=C;C=B;var s2=(A+F+Kc[i]+M[g])>>>0;B=(B+((s2<<S[i])|(s2>>>(32-S[i]))))>>>0;A=t}
+a=(a+A)>>>0;c2=(c2+B)>>>0;c3=(c3+C)>>>0;c4=(c4+D)>>>0}
+var o2=new Uint8Array(16),ov=new DataView(o2.buffer);ov.setUint32(0,a,true);ov.setUint32(4,c2,true);ov.setUint32(8,c3,true);ov.setUint32(12,c4,true);var out='';for(i=0;i<16;i++)out+=('0'+o2[i].toString(16)).slice(-2);return out}
+
+var STATE={};
+function e164d(s){return s.replace(/[^\d]/g,'')}
+function flag(c){return c.replace(/./g,function(x){return String.fromCodePoint(127397+x.charCodeAt(0))})}
+function cname(c){try{return new Intl.DisplayNames(['en'],{type:'region'}).of(c)||c}catch(e){return c}}
+function links(t,arr){if(!arr.length)return '';return '<div class="ct">'+esc(t)+'</div><div class="gr">'+arr.map(function(i){return '<div class="it"><span class="nm">'+esc(i.n)+'</span><a href="'+esc(i.h)+'" target="_blank" rel="noopener">OPEN</a></div>'}).join('')+'</div>'}
+
+function webSearch(q){var U=['https://www.bing.com/search?q='+encodeURIComponent(q),'https://html.duckduckgo.com/html/?q='+encodeURIComponent(q),'https://lite.duckduckgo.com/lite/?q='+encodeURIComponent(q)],i=0;
+function st(){if(i>=U.length)return Promise.resolve(null);return get(U[i++]).then(function(t){if(!t)return st();
+ var h='',n=0;
+ if(t.indexOf('](')>0){var re=/\[([^\]]{4,90})\]\((https?:\/\/[^)\s]+)\)/g,m;
+  while((m=re.exec(t))&&n<8){if(/bing\.com|duckduckgo|microsoft|go\.microsoft|jina\.ai/.test(m[2]))continue;
+   h+='<div class="rs"><b><a href="'+esc(m[2])+'" target="_blank" rel="noopener">'+esc(m[1])+'</a></b></div>';n++}}
+ else{var d=new DOMParser().parseFromString(t,'text/html');
+  [].slice.call(d.querySelectorAll('.b_algo h2 a,.result__a,.result-link')).forEach(function(a){if(n>=8)return;
+   var u=a.getAttribute('href')||'',mm=u.match(/uddg=([^&]+)/);if(mm)u=decodeURIComponent(mm[1]);
+   if(!/^https?:/.test(u))return;var p=a.closest('.result,tr,.b_algo'),sn=p&&p.querySelector('.result__snippet,.result-snippet,.b_caption p');
+   h+='<div class="rs"><b><a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(a.textContent.trim().slice(0,85))+'</a></b><span>'+esc(sn?sn.textContent.trim().slice(0,140):'')+'</span></div>';n++})}
+ return n?{h:h,st:1,em:extractEmails(t)}:st()})}
+return st()}
+
+var TY={MOBILE:'Mobile',FIXED_LINE:'Landline',FIXED_LINE_OR_MOBILE:'Mobile/Landline',TOLL_FREE:'Toll free',PREMIUM_RATE:'Premium',VOIP:'VoIP',SHARED_COST:'Shared cost',PERSONAL_NUMBER:'Personal',PAGER:'Pager',UAN:'UAN',VOICEMAIL:'Voicemail'};
+
+function runPhone(){var raw=$('#ph').value.trim(),cc=$('#cc').value,out=$('#ph-out');
+if(!raw){out.innerHTML='<div class="er">Number daalo.</div>';return}
+var dg=raw.replace(/[^\d]/g,''),p=null,iso=cc;
+try{if(window.libphonenumber){p=window.libphonenumber.parsePhoneNumberFromString(raw.charAt(0)==='+'?raw:raw.replace(/^0+/,''),cc);if(p)iso=p.country||cc}}catch(e){}
+if(!p&&dg.length<6){out.innerHTML='<div class="er">Parse fail. Country select kar ya + ke saath pura number de.</div>';return}
+var e164=p?p.number:'+'+dg,nat=p?p.nationalNumber:dg;iso=(iso||'IN').toLowerCase();
+STATE.phone={input:raw,e164:e164,national:nat,iso:iso,emails:[],names:[]};
+var tt=p&&p.getType()?(TY[p.getType()]||p.getType()):'unknown',vd=p?p.isValid():null;
+out.innerHTML='<div class="sum" id="ph-sum" style="display:none"></div>'+
+'<div class="cd"><h3>number</h3><div class="kv"><b>E.164</b><span>'+esc(e164)+' <a href="#" onclick="copy(\''+esc(e164)+'\');return false" style="font-size:11px">copy</a></span><b>Country</b><span>'+flag(iso.toUpperCase())+' '+esc(cname(iso.toUpperCase()))+'</span><b>Type</b><span>'+esc(tt)+'</span><b>Valid</b><span>'+(vd===false?'<span class="pl no">NO</span>':'<span class="pl ok">YES</span>')+'</span></div></div>'+
+'<div class="qb"><a href="https://www.truecaller.com/search/'+iso+'/'+nat+'" target="_blank" rel="noopener">TRUECALLER</a><a href="https://www.google.com/search?q=%22'+nat+'%22+site%3Ajustdial.com" target="_blank" rel="noopener">JUSTDIAL</a><a href="https://www.google.com/search?q=%22'+nat+'%22" target="_blank" rel="noopener">GOOGLE</a><a href="https://wa.me/'+e164d(e164)+'" target="_blank" rel="noopener">WHATSAPP</a></div><div id="ph-src"></div>';
+var tcUrl='https://www.truecaller.com/search/'+iso+'/'+nat;
+var list=[
+{id:'tc',t:'truecaller',l:tcUrl,f:function(){return meta(tcUrl).then(function(m){
+ if(m&&m.title&&!GEN.test(m.title)){STATE.phone.names.push(m.title);return{h:'<div class="pf">'+(m.img?'<img class="av" src="'+esc(m.img)+'">':'')+'<div class="kv"><b>Name</b><span style="font-size:16px;color:var(--ac)">'+esc(m.title)+'</span></div></div>',st:1}}
+ return get(tcUrl).then(function(t){var nm=pickName(t),im=(String(t).match(/!\[[^\]]*\]\((https?:\/\/[^)\s]+)\)/)||[])[1]||'';
+  if(nm){STATE.phone.names.push(nm);return{h:'<div class="pf">'+(im?'<img class="av" src="'+esc(im)+'">':'')+'<div class="kv"><b>Name</b><span style="font-size:16px;color:var(--ac)">'+esc(nm)+'</span></div></div>',st:1}}
+  return null})})}},
+{id:'sm',t:'sync.me',l:'https://sync.me/search/?number='+e164d(e164),f:function(){var u='https://sync.me/search/?number='+encodeURIComponent(e164);
+ return meta(u).then(function(m){if(m&&m.title&&!GEN.test(m.title)){STATE.phone.names.push(m.title);return{h:'<div class="kv"><b>Name</b><span style="color:var(--ac)">'+esc(m.title)+'</span></div>',st:1}}
+ return get(u).then(function(t){var nm=pickName(t);if(nm){STATE.phone.names.push(nm);return{h:'<div class="kv"><b>Name</b><span style="color:var(--ac)">'+esc(nm)+'</span></div>',st:1}}return null})})}},
+{id:'tg',t:'telegram',l:'https://t.me/+'+e164d(e164),f:function(){var u='https://t.me/+'+e164d(e164);
+ return meta(u).then(function(m){if(m&&m.title&&!/telegram/i.test(m.title))return{h:'<div class="pf">'+(m.img?'<img class="av" src="'+esc(m.img)+'">':'')+'<div class="kv"><b>Telegram name</b><span style="color:var(--ac)">'+esc(m.title)+'</span></div></div>',st:1};
+  return get(u).then(function(t){var m1=String(t).match(/tgme_page_title"[^>]*>([^<]+)</i)||String(t).match(/og:title"\s+content="([^"]*)"/i),tk=m1?m1[1]:'';
+   if(tk&&!/telegram/i.test(tk))return{h:'<div class="kv"><b>Telegram name</b><span style="color:var(--ac)">'+esc(tk)+'</span></div>',st:1};return null})})}},
+{id:'em',t:'email discovery',l:'https://www.google.com/search?q=%22'+nat+'%22+%40gmail.com',f:function(){
+ var Q=['"'+nat+'" "@gmail.com"','"'+nat+'" email OR mail OR contact','"'+e164+'" "@gmail.com" OR "@yahoo"'];
+ var all=[];
+ return Q.reduce(function(pr,q){return pr.then(function(){return webSearch(q).then(function(r){
+  if(r&&r.em)all=all.concat(r.em)})})},Promise.resolve()).then(function(){
+  all=all.filter(function(e,i,a){return a.indexOf(e)===i});
+  STATE.phone.emails=all;
+  if(!all.length)return null;
+  return{h:'<div class="chips">'+all.map(function(e){return '<span class="chip" onclick="copy(\''+esc(e)+'\')">'+esc(e)+'</span>'}).join('')+'</div><p class="hn">tap = copy</p>',st:1}})}},
+{id:'wm',t:'web mentions',l:'https://www.google.com/search?q=%22'+nat+'%22',f:function(){return webSearch('"'+nat+'" OR "'+e164+'"')}}];
+if(K().veriphone)list.push({id:'vp',t:'veriphone',l:'https://veriphone.io/',f:function(){return js('https://api.veriphone.io/v2/verify?phone='+encodeURIComponent(e164)+'&key='+K().veriphone).then(function(d){return{h:'<div class="kv"><b>Carrier</b><span>'+esc(d.carrier||'—')+'</span><b>Region</b><span>'+esc(d.region||'—')+'</span></div>',st:1}})}});
+else if(K().phone)list.push({id:'ap',t:'abstractapi',l:'https://www.abstractapi.com/',f:function(){return js('https://phonevalidation.abstractapi.com/v1/?api_key='+K().phone+'&phone='+encodeURIComponent(e164)).then(function(d){return{h:'<div class="kv"><b>Carrier</b><span>'+esc(d.carrier||'—')+'</span><b>Location</b><span>'+esc(d.location||'—')+'</span></div>',st:1}})}});
+runAll(list,document.getElementById('ph-src')).then(function(){
+ var s=document.getElementById('ph-sum'),n=STATE.phone.names.filter(function(v,i,a){return a.indexOf(v)===i}),em=STATE.phone.emails;
+ if(n.length||em.length){s.style.display='block';
+  s.innerHTML='<h3>found</h3>'+(n.length?'<div class="kv"><b>Names</b><span style="color:var(--ac);font-size:15px">'+esc(n.join(' · '))+'</span></div>':'')+
+  (em.length?'<div class="kv"><b>Emails</b><span class="chips">'+em.map(function(e){return '<span class="chip" onclick="copy(\''+esc(e)+'\')">'+esc(e)+'</span>'}).join('')+'</span></div>':'')}
+ document.getElementById('ph-src').insertAdjacentHTML('beforeend',links('more',[{n:'Signal',h:'https://signal.me/#p/'+e164},{n:'Epieos',h:'https://epieos.com/?q='+encodeURIComponent(e164)+'&t=phone'},{n:'Numlookup',h:'https://www.numlookup.com/'},{n:'Carrier Lookup',h:'https://freecarrierlookup.com/'},{n:'Google → OLX',h:'https://www.google.com/search?q=%22'+nat+'%22+site%3Aolx.in'},{n:'Google → Facebook',h:'https://www.google.com/search?q=%22'+nat+'%22+site%3Afacebook.com'},{n:'Google → PDF',h:'https://www.google.com/search?q=%22'+nat+'%22+filetype%3Apdf'}]))})}
+
+function runEmail(){var em=$('#em').value.trim().toLowerCase(),out=$('#em-out');
+if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)){out.innerHTML='<div class="er">Email galat hai.</div>';return}
+var pt=em.split('@'),loc=pt[0],dom=pt[1],h=md5(em);STATE.email={email:em,domain:dom};
+out.innerHTML='<div class="cd"><h3>email</h3><div class="kv"><b>Email</b><span>'+esc(em)+'</span><b>Domain</b><span>'+esc(dom)+'</span><b>Hash</b><span style="font-size:11px;word-break:break-all">'+h+'</span></div></div>'+
+'<div class="qb"><a href="https://haveibeenpwned.com/account/'+encodeURIComponent(em)+'" target="_blank" rel="noopener">HIBP</a><a href="https://epieos.com/?q='+encodeURIComponent(em)+'&t=email" target="_blank" rel="noopener">EPIEOS</a><a href="https://www.google.com/search?q=%22'+encodeURIComponent(em)+'%22" target="_blank" rel="noopener">GOOGLE</a></div><div id="em-src"></div>';
+var list=[
+{id:'gv',t:'gravatar',l:'https://gravatar.com/'+h,f:function(){return js('https://gravatar.com/'+h+'.json').then(function(d){var p=d.entry[0];return{h:'<div class="pf"><img class="av" src="'+esc(p.thumbnailUrl)+'"><div class="kv"><b>Name</b><span style="color:var(--ac)">'+esc((p.name&&p.name.formatted)||'—')+'</span><b>User</b><span>'+esc(p.preferredUsername||'—')+'</span><b>About</b><span>'+esc(p.aboutMe||'—')+'</span><b>Location</b><span>'+esc(p.currentLocation||'—')+'</span></div></div>',st:1}})}},
+{id:'kb',t:'disposable',l:'https://open.kickbox.com/v1/disposable/'+encodeURIComponent(em),f:function(){return js('https://open.kickbox.com/v1/disposable/'+encodeURIComponent(em)).then(function(d){return{h:'<b style="font-size:13px">Disposable:</b> '+(d.disposable?'<span class="pl no">YES</span>':'<span class="pl ok">NO</span>'),st:1}})}},
+{id:'dns',t:'dns / mail server',l:'https://dns.google/query?name='+encodeURIComponent(dom)+'&type=MX',f:function(){return js('https://dns.google/resolve?name='+encodeURIComponent(dom)+'&type=MX').then(function(d){var mx=(d.Answer||[]).filter(function(a){return a.type===15}).map(function(a){return a.data.split(/\s+/).pop()});
+return js('https://dns.google/resolve?name='+encodeURIComponent(dom)+'&type=TXT').then(function(t){var tx=(t.Answer||[]).map(function(a){return a.data}).join(' '),sv=[];
+if(/google-site-verification/.test(tx))sv.push('Google Workspace');if(/MS=ms/.test(tx))sv.push('Microsoft 365');if(/atlassian/.test(tx))sv.push('Atlassian');if(/shopify/.test(tx))sv.push('Shopify');if(/stripe/.test(tx))sv.push('Stripe');if(/v=spf1/.test(tx))sv.push('SPF present');
+return{h:'<div class="mo">'+esc(mx.length?mx.join('\n'):'no MX')+(sv.length?'\n\nServices: '+sv.join(', '):'')+'</div>',st:1}})})}},
+{id:'rd',t:'domain whois',l:'https://rdap.org/domain/'+encodeURIComponent(dom),f:function(){return js('https://rdap.org/domain/'+encodeURIComponent(dom)).then(function(d){var ev=(d.events||[]).filter(function(x){return x.eventAction==='registration'})[0],reg=(d.entities||[]).filter(function(x){return x.roles&&x.roles.indexOf('registrar')>=0})[0],rn='';try{rn=reg.vcardArray[1].filter(function(v){return v[0]==='fn'})[0][3]}catch(e){}
+return{h:'<div class="kv"><b>Registered</b><span>'+(ev?esc(ev.eventDate.slice(0,10)):'—')+'</span><b>Registrar</b><span>'+esc(rn||'—')+'</span></div>',st:1}})}},
+{id:'er',t:'emailrep',l:'https://emailrep.io/'+encodeURIComponent(em),f:function(){return js('https://emailrep.io/'+encodeURIComponent(em)).then(function(d){var row=function(k,v){return '<b>'+k+'</b><span>'+esc(String(v))+'</span>'};
+return{h:'<div class="kv">'+row('Reputation',d.reputation||'—')+row('Suspicious',d.suspicious)+row('Profiles',((d.details&&d.details.profiles)||[]).join(', ')||'—')+row('Breaches',d.details&&d.details.breaches)+row('Blacklisted',d.details&&d.details.blacklisted)+'</div>',st:1}})}},
+{id:'lc',t:'leakcheck',l:'https://leakcheck.io/',f:function(){return get('https://leakcheck.io/api/public?check='+encodeURIComponent(em)).then(function(t){var d=JSON.parse(t);
+return{h:d.found?'<div class="mo">'+esc(((d.sources||[]).map(function(s){return s.name})).join('\n')||'found')+'</div>':'<p class="hn">koi public leak nahi</p>',st:d.found}})}},
+{id:'gh',t:'github accounts + commits',l:'https://github.com/search?q='+encodeURIComponent(em),f:function(){return js('https://api.github.com/search/users?q='+encodeURIComponent(em)+'+in:email').then(function(u){var h='';
+(u.items||[]).slice(0,5).forEach(function(i){h+='<div class="rs"><b><a href="'+esc(i.html_url)+'" target="_blank">'+esc(i.login)+'</a></b><span>github user</span></div>'});
+return fetch('https://api.github.com/search/commits?q=author-email:'+encodeURIComponent(em),{headers:{Accept:'application/vnd.github.cloak-preview'}}).then(function(r){return r.json()}).then(function(c){
+(c.items||[]).slice(0,5).forEach(function(i){h+='<div class="rs"><b><a href="'+esc(i.html_url)+'" target="_blank">'+esc((i.repository&&i.repository.full_name)||'commit')+'</a></b><span>author: '+esc((i.commit&&i.commit.author&&i.commit.author.name)||'')+'</span></div>'});
+return{h:h||null,st:!!h}}).catch(function(){return{h:h||null,st:!!h}})})}},
+{id:'svc',t:'service accounts',l:'https://duolingo.com',f:function(){var P=[['Duolingo','https://www.duolingo.com/2017-06-30/users?email='+encodeURIComponent(em),function(d){return d.users&&d.users.length}],['WordPress','https://public-api.wordpress.com/rest/v1.1/users/email/'+encodeURIComponent(em),function(d){return d.ID}],['Pinterest','https://www.pinterest.com/resource/EmailExistsResource/get/?source_url=%2F&data=%7B%22options%22%3A%7B%22email%22%3A%22'+encodeURIComponent(em)+'%22%7D%7D',function(d){return JSON.stringify(d).indexOf('"status":"success"')>=0}]];
+var h='',f=0;return P.reduce(function(pr,it){return pr.then(function(){return js(it[1]).then(function(d){var y=it[2](d);if(y)f++;h+='<div class="rs"><b>'+it[0]+'</b><span>'+(y?'<span class="pl ok">EXISTS</span>':'<span class="pl no">not found</span>')+'</span></div>'}).catch(function(){h+='<div class="rs"><b>'+it[0]+'</b><span>blocked</span></div>'})})},Promise.resolve()).then(function(){return{h:h,st:f}})}},
+{id:'wm',t:'web mentions',l:'https://www.google.com/search?q=%22'+encodeURIComponent(em)+'%22',f:function(){return webSearch('"'+em+'"')}},
+{id:'ng',t:'name guess',l:'https://genderize.io',f:function(){var f1=loc.split(/[._\-0-9]/)[0];return js('https://api.genderize.io/?name='+encodeURIComponent(f1)).then(function(d){if(!d.gender)return null;return{h:'<div class="kv"><b>Gender</b><span>'+esc(d.gender)+' ('+Math.round(d.probability*100)+'%)</span></div>',st:1}})}}];
+if(K().email)list.push({id:'aem',t:'abstractapi',l:'https://www.abstractapi.com/',f:function(){return js('https://emailvalidation.abstractapi.com/v1/?api_key='+K().email+'&email='+encodeURIComponent(em)).then(function(d){return{h:'<div class="kv"><b>Deliverability</b><span>'+esc(d.deliverability||'?')+'</span><b>SMTP</b><span>'+d.is_smtp_valid+'</span></div>',st:1}})}});
+runAll(list,document.getElementById('em-src')).then(function(){document.getElementById('em-src').insertAdjacentHTML('beforeend',links('dorks',[{n:'HIBP',h:'https://haveibeenpwned.com/account/'+encodeURIComponent(em)},{n:'Intelligence X',h:'https://intelx.io/?s='+encodeURIComponent(em)},{n:'DeHashed',h:'https://dehashed.com/'},{n:'Snusbase',h:'https://snusbase.com/'},{n:'Hunter',h:'https://hunter.io/email-verifier/'+encodeURIComponent(em)},{n:'Google → pastebin',h:'https://www.google.com/search?q=%22'+encodeURIComponent(em)+'%22+site%3Apastebin.com'},{n:'crt.sh',h:'https://crt.sh/?q=%25.'+encodeURIComponent(dom)}]))})}
+
+var SITES=[
+{n:'GitHub',c:'Dev',u:'https://github.com/{u}',a:'gh'},{n:'GitLab',c:'Dev',u:'https://gitlab.com/{u}'},{n:'Bitbucket',c:'Dev',u:'https://bitbucket.org/{u}/'},
+{n:'npm',c:'Dev',u:'https://www.npmjs.com/~{u}',a:'npm'},{n:'PyPI',c:'Dev',u:'https://pypi.org/user/{u}/'},{n:'Docker Hub',c:'Dev',u:'https://hub.docker.com/u/{u}'},
+{n:'Dev.to',c:'Dev',u:'https://dev.to/{u}'},{n:'CodePen',c:'Dev',u:'https://codepen.io/{u}'},{n:'Replit',c:'Dev',u:'https://replit.com/@{u}'},
+{n:'Kaggle',c:'Dev',u:'https://www.kaggle.com/{u}'},{n:'Hacker News',c:'Dev',u:'https://news.ycombinator.com/user?id={u}',a:'hn'},{n:'Codeforces',c:'Dev',u:'https://codeforces.com/profile/{u}'},
+{n:'HackerOne',c:'Dev',u:'https://hackerone.com/{u}'},{n:'Product Hunt',c:'Dev',u:'https://www.producthunt.com/@{u}'},
+{n:'Instagram',c:'Social',u:'https://www.instagram.com/{u}/'},{n:'Facebook',c:'Social',u:'https://www.facebook.com/{u}'},{n:'X / Twitter',c:'Social',u:'https://x.com/{u}'},
+{n:'Threads',c:'Social',u:'https://www.threads.net/@{u}'},{n:'TikTok',c:'Social',u:'https://www.tiktok.com/@{u}'},{n:'Snapchat',c:'Social',u:'https://www.snapchat.com/add/{u}'},
+{n:'Pinterest',c:'Social',u:'https://www.pinterest.com/{u}/'},{n:'Reddit',c:'Social',u:'https://www.reddit.com/user/{u}',a:'rd'},{n:'Telegram',c:'Social',u:'https://t.me/{u}'},
+{n:'Bluesky',c:'Social',u:'https://bsky.app/profile/{u}.bsky.social',a:'bsky'},{n:'Mastodon',c:'Social',u:'https://mastodon.social/@{u}'},{n:'YouTube',c:'Social',u:'https://www.youtube.com/@{u}'},
+{n:'Vimeo',c:'Social',u:'https://vimeo.com/{u}'},{n:'Twitch',c:'Social',u:'https://www.twitch.tv/{u}'},{n:'Tumblr',c:'Social',u:'https://{u}.tumblr.com'},
+{n:'VK',c:'Social',u:'https://vk.com/{u}'},{n:'Medium',c:'Writing',u:'https://medium.com/@{u}'},{n:'Substack',c:'Writing',u:'https://{u}.substack.com'},
+{n:'WordPress',c:'Writing',u:'https://{u}.wordpress.com'},{n:'Blogger',c:'Writing',u:'https://{u}.blogspot.com'},{n:'Trello',c:'Writing',u:'https://trello.com/{u}'},
+{n:'Pastebin',c:'Writing',u:'https://pastebin.com/u/{u}'},{n:'Disqus',c:'Writing',u:'https://disqus.com/by/{u}'},
+{n:'Steam',c:'Gaming',u:'https://steamcommunity.com/id/{u}'},{n:'Roblox',c:'Gaming',u:'https://www.roblox.com/user.aspx?username={u}'},{n:'Chess.com',c:'Gaming',u:'https://www.chess.com/member/{u}',a:'chess'},
+{n:'Lichess',c:'Gaming',u:'https://lichess.org/@/{u}',a:'lichess'},{n:'Itch.io',c:'Gaming',u:'https://{u}.itch.io'},{n:'Duolingo',c:'Gaming',u:'https://www.duolingo.com/profile/{u}'},
+{n:'Behance',c:'Creative',u:'https://www.behance.net/{u}'},{n:'Dribbble',c:'Creative',u:'https://dribbble.com/{u}'},{n:'Figma',c:'Creative',u:'https://www.figma.com/@{u}'},
+{n:'SoundCloud',c:'Creative',u:'https://soundcloud.com/{u}'},{n:'Bandcamp',c:'Creative',u:'https://{u}.bandcamp.com'},{n:'Last.fm',c:'Creative',u:'https://www.last.fm/user/{u}'},
+{n:'Letterboxd',c:'Creative',u:'https://letterboxd.com/{u}'},{n:'Goodreads',c:'Creative',u:'https://www.goodreads.com/{u}'},
+{n:'Keybase',c:'Identity',u:'https://keybase.io/{u}',a:'keybase'},{n:'Gravatar',c:'Identity',u:'https://gravatar.com/{u}'},{n:'About.me',c:'Identity',u:'https://about.me/{u}'},
+{n:'Linktree',c:'Identity',u:'https://linktr.ee/{u}'},{n:'Credly',c:'Identity',u:'https://www.credly.com/users/{u}'},{n:'Patreon',c:'Money',u:'https://www.patreon.com/{u}'},
+{n:'Ko-fi',c:'Money',u:'https://ko-fi.com/{u}'},{n:'Buy Me a Coffee',c:'Money',u:'https://www.buymeacoffee.com/{u}'}];
+
+var CHK={
+gh:function(q){return fetch('https://api.github.com/users/'+encodeURIComponent(q)).then(function(r){if(r.status===404)return{s:'no'};if(!r.ok)return{s:'e'};return r.json().then(function(d){return{s:'yes',x:{av:d.avatar_url,n:d.name,b:d.bio,l:d.location,w:d.blog,r:d.public_repos,f:d.followers}}})})},
+bsky:function(q){return fetch('https://public.api.bsky.app/xrpc/com.atproto.identity.resolveHandle?handle='+encodeURIComponent(q)+'.bsky.social').then(function(r){return{s:r.ok?'yes':'no'}})},
+keybase:function(q){return js('https://keybase.io/_/api/1.0/user/lookup.json?username='+encodeURIComponent(q)).then(function(d){return{s:d.status&&d.status.code===0?'yes':'no'}})},
+hn:function(q){return js('https://hacker-news.firebaseio.com/v0/user/'+encodeURIComponent(q)+'.json').then(function(d){return{s:d?'yes':'no'}})},
+chess:function(q){return fetch('https://api.chess.com/pub/player/'+encodeURIComponent(q)).then(function(r){return{s:r.ok?'yes':'no'}})},
+lichess:function(q){return fetch('https://lichess.org/api/user/'+encodeURIComponent(q)).then(function(r){return{s:r.ok?'yes':'no'}})},
+rd:function(q){return fetch('https://www.reddit.com/user/'+encodeURIComponent(q)+'/about.json').then(function(r){if(!r.ok)return{s:'e'};return r.json().then(function(d){return{s:d.data&&d.data.name?'yes':'no'}})})},
+npm:function(q){return js('https://registry.npmjs.org/-/v1/search?text=maintainer:'+encodeURIComponent(q)+'&size=1').then(function(d){return{s:d.total>0?'yes':'no'}})}};
+
+function runUser(){var q=$('#un').value.trim().replace(/^@/,''),out=$('#un-out');
+if(!q){out.innerHTML='<div class="er">Username daalo.</div>';return}
+STATE.user={username:q,found:[]};
+var html='<div class="qb"><a href="https://www.google.com/search?q=%22'+encodeURIComponent(q)+'%22" target="_blank" rel="noopener">GOOGLE</a><a href="https://x.com/'+encodeURIComponent(q)+'" target="_blank" rel="noopener">X</a><a href="https://www.instagram.com/'+encodeURIComponent(q)+'/" target="_blank" rel="noopener">INSTAGRAM</a><a href="https://github.com/'+encodeURIComponent(q)+'" target="_blank" rel="noopener">GITHUB</a></div><div id="prof"></div><div id="wm-u"></div>';
+[...new Set(SITES.map(function(s){return s.c}))].forEach(function(c){
+html+='<div class="ct">'+esc(c)+'</div><div class="gr">'+SITES.filter(function(s){return s.c===c}).map(function(s){
+return '<div class="it" id="s-'+s.n.replace(/[^a-z]/gi,'')+'"><span class="dt '+(s.a?'e':'')+'"></span><span class="nm">'+esc(s.n)+'</span><a href="'+esc(s.u.replace('{u}',encodeURIComponent(q)))+'" target="_blank" rel="noopener" data-h="'+esc(s.u.replace('{u}',encodeURIComponent(q)))+'">OPEN</a></div>'}).join('')+'</div>'});
+out.innerHTML=html;
+var Q=SITES.filter(function(s){return s.a}),i=0;
+function wk(){if(i>=Q.length)return Promise.resolve();var s=Q[i++],el=document.getElementById('s-'+s.n.replace(/[^a-z]/gi,'')),dot=el.querySelector('.dt');
+return CHK[s.a](q).then(function(r){dot.className='dt '+(r.s==='yes'?'f':r.s==='no'?'x':'e');
+if(r.s==='yes'){STATE.user.found.push(s.n);var a=el.querySelector('a');a.textContent='FOUND';a.style.color='var(--ac)';
+if(r.x&&r.x.av)document.getElementById('prof').innerHTML='<div class="cd"><h3>github profile</h3><div class="pf"><img class="av" src="'+esc(r.x.av)+'"><div class="kv"><b>Name</b><span style="color:var(--ac)">'+esc(r.x.n||'—')+'</span><b>Bio</b><span>'+esc(r.x.b||'—')+'</span><b>Location</b><span>'+esc(r.x.l||'—')+'</span><b>Site</b><span>'+esc(r.x.w||'—')+'</span><b>Repos</b><span>'+esc(r.x.r)+'</span><b>Followers</b><span>'+esc(r.x.f)+'</span></div></div></div>'}
+else if(r.s==='no')el.style.opacity='.4'}).catch(function(){dot.className='dt e'}).then(wk)}
+Promise.all([wk(),wk(),wk(),wk(),wk(),wk()]).then(function(){
+out.insertAdjacentHTML('beforeend','<div class="cd"><h3>summary</h3><p class="hn">Confirmed: <b style="color:var(--ac)">'+STATE.user.found.length+'</b> — '+esc(STATE.user.found.join(', ')||'none')+'</p></div>');
+return webSearch('"'+q+'"')}).then(function(r){if(r)document.getElementById('wm-u').innerHTML='<div class="cd"><h3>web mentions</h3>'+r.h+'</div>'})}
+function openAll(){var l=[].slice.call(document.querySelectorAll('#un-out a[data-h]')).slice(0,12);if(!l.length){toast('pehle scan');return}l.forEach(function(a,i){setTimeout(function(){window.open(a.dataset.h,'_blank')},i*160)})}
+function dlReport(){var t='KHOJ '+new Date().toISOString()+'\n\n'+JSON.stringify(STATE,null,2)+'\n\nLINKS\n';
+[].slice.call(document.querySelectorAll('.it a[href]')).forEach(function(a){var p=a.closest('.it');t+=(p&&p.querySelector('.nm')?p.querySelector('.nm').textContent:'')+' -> '+a.href+'\n'});
+var b=new Blob([t],{type:'text/plain'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='khoj-'+Date.now()+'.txt';a.click();URL.revokeObjectURL(u);toast('saved')}
+
+$('#ph').onkeydown=function(e){if(e.key==='Enter')runPhone()};
+$('#em').onkeydown=function(e){if(e.key==='Enter')runEmail()};
+$('#un').onkeydown=function(e){if(e.key==='Enter')runUser()};
+</script>
+</body>
+</html>
